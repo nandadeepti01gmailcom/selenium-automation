@@ -1,0 +1,12 @@
+com\example\utils\ConfigReader.class
+com\example\utils\SummaryReportGenerator.class
+com\example\pages\Login.class
+com\example\utils\WebDriverFactory.class
+com\example\utils\DetailedReportGenerator.class
+com\example\utils\LocatorParser.class
+com\example\base\BasePage.class
+com\example\utils\ExtentReportListener.class
+com\example\base\BaseClass.class
+com\example\utils\DetailedReportGenerator$TestCaseDetail.class
+com\example\pages\Dashboard.class
+com\example\utils\TestDataManager.class

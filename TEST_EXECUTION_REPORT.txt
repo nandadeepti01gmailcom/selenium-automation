@@ -1,0 +1,177 @@
+/**
+ * MYNTRA TEST EXECUTION REPORT
+ * Environment: STAGING
+ * URL: https://www.myntra.com/
+ * Test Class: MyntraTest.java
+ * Date: January 19, 2026
+ * 
+ * ============================================================
+ * TEST EXECUTION SUMMARY
+ * ============================================================
+ */
+
+TEST CONFIGURATION:
+- Environment: staging
+- Application URL: https://www.myntra.com/
+- Browser: Chrome
+- Implicit Wait: 10 seconds
+- Explicit Wait: 15 seconds
+- Page Load Wait: 2000 milliseconds
+
+============================================================
+TEST CASES AND ASSERTIONS:
+============================================================
+
+TEST 1: testMyntraPageLoad (@Order(1) - HIGHEST PRIORITY)
+┌─────────────────────────────────────────────────────────┐
+│ Purpose: Verify that Myntra page loads successfully    │
+│ Test Steps:                                             │
+│   1. Launch browser with staging.myntra.url            │
+│   2. Wait 3 seconds for page load                       │
+│   3. Get current URL                                    │
+│                                                         │
+│ Assertions:                                             │
+│   ✓ currentURL != null                                  │
+│   ✓ currentURL.isEmpty() == false                       │
+│   ✓ Page navigated successfully                         │
+└─────────────────────────────────────────────────────────┘
+
+TEST 2: testMyntraPageTitle (@Order(2) - HIGH PRIORITY)
+┌─────────────────────────────────────────────────────────┐
+│ Purpose: Verify that Myntra page has correct title     │
+│ Test Steps:                                             │
+│   1. Launch browser with staging.myntra.url            │
+│   2. Wait 3 seconds for page load                       │
+│   3. Get page title                                     │
+│                                                         │
+│ Assertions:                                             │
+│   ✓ pageTitle != null                                   │
+│   ✓ pageTitle.isEmpty() == false                        │
+│   ✓ pageTitle.toLowerCase() contains "myntra" OR       │
+│     "online shopping"                                   │
+│   ✓ Page title matches expected content                 │
+└─────────────────────────────────────────────────────────┘
+
+TEST 3: testMyntraPageURL (@Order(3) - MEDIUM PRIORITY)
+┌─────────────────────────────────────────────────────────┐
+│ Purpose: Verify correct URL is loaded                  │
+│ Test Steps:                                             │
+│   1. Launch browser with staging.myntra.url            │
+│   2. Wait 3 seconds for page load                       │
+│   3. Get current URL                                    │
+│                                                         │
+│ Assertions:                                             │
+│   ✓ currentURL.contains("myntra") == true               │
+│   ✓ currentURL.startsWith("https://") == true           │
+│   ✓ URL uses secure protocol (HTTPS)                    │
+│   ✓ URL contains correct domain                         │
+└─────────────────────────────────────────────────────────┘
+
+TEST 4: testMyntraPageContent (@Order(4) - MEDIUM-LOW PRIORITY)
+┌─────────────────────────────────────────────────────────┐
+│ Purpose: Verify page has expected content              │
+│ Test Steps:                                             │
+│   1. Launch browser with staging.myntra.url            │
+│   2. Wait 3 seconds for page load                       │
+│   3. Get page source                                    │
+│                                                         │
+│ Assertions:                                             │
+│   ✓ pageSource != null                                  │
+│   ✓ pageSource.length() > 1000 characters              │
+│   ✓ pageSource.contains("404") == false                │
+│   ✓ Page loaded content successfully                    │
+│   ✓ No 404 error page                                   │
+└─────────────────────────────────────────────────────────┘
+
+TEST 5: testEnvironmentConfiguration (@Order(5) - LOWEST PRIORITY)
+┌─────────────────────────────────────────────────────────┐
+│ Purpose: Verify environment configuration              │
+│ Test Steps:                                             │
+│   1. Get current environment from TestDataManager      │
+│   2. Get Myntra URL from TestDataManager               │
+│   3. Verify configuration values                        │
+│                                                         │
+│ Assertions:                                             │
+│   ✓ TestDataManager.getEnvironment() == "staging"      │
+│   ✓ TestDataManager.getMyntraURL() ==                   │
+│     "https://www.myntra.com/"                           │
+│   ✓ Configuration correctly loaded from properties     │
+└─────────────────────────────────────────────────────────┘
+
+============================================================
+ASSERTION DETAILS:
+============================================================
+
+All assertions use JUnit 5 Jupiter:
+- assertTrue() - Verifies condition is true
+- assertFalse() - Verifies condition is false
+- assertNotNull() - Verifies object is not null
+- assertEquals() - Verifies two values are equal
+- assertFalse(contains) - Verifies string doesn't contain value
+
+============================================================
+EXPECTED RESULTS:
+============================================================
+
+✓ All 5 tests should PASS
+✓ Myntra homepage should load successfully
+✓ Page title should contain "Myntra" or "Online Shopping"
+✓ Current URL should contain "myntra" domain
+✓ HTTPS protocol should be used
+✓ Page should have substantial HTML content (>1000 chars)
+✓ No 404 error should appear
+✓ Environment should be "staging"
+✓ Myntra URL should be "https://www.myntra.com/"
+
+============================================================
+TEST CONFIGURATION FILE (config.properties):
+============================================================
+
+Current Environment: staging
+
+staging.url=https://staging.example.com/login/
+staging.myntra.url=https://www.myntra.com/
+staging.browser=chrome
+staging.implicitWait=10
+staging.explicitWait=15
+staging.page.wait=2000
+
+============================================================
+TO RUN THE TESTS:
+============================================================
+
+Using Maven:
+  mvn test -Dtest=MyntraTest
+
+Using Maven (specific test):
+  mvn test -Dtest=MyntraTest#testMyntraPageLoad
+
+Using IDE:
+  Right-click MyntraTest class > Run Tests
+
+============================================================
+ASSERTION FAILURE SCENARIOS:
+============================================================
+
+If any assertion fails:
+1. testMyntraPageLoad fails:
+   - Issue: Cannot navigate to URL
+   - Check: Network connectivity, URL validity
+
+2. testMyntraPageTitle fails:
+   - Issue: Page title doesn't match expected
+   - Check: Website layout changes, dynamic title loading
+
+3. testMyntraPageURL fails:
+   - Issue: URL redirection or domain issue
+   - Check: Website redirects, SSL certificates
+
+4. testMyntraPageContent fails:
+   - Issue: Page didn't load content or 404 error
+   - Check: Website availability, server response
+
+5. testEnvironmentConfiguration fails:
+   - Issue: Wrong environment or configuration
+   - Check: config.properties file, environment variable
+
+============================================================
