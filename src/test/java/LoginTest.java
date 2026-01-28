@@ -28,7 +28,7 @@ import com.example.utils.ExtentReportListener;
  * Tests are ordered to verify basic functionality first, then proceed to login tests
  */
 @ExtendWith(ExtentReportListener.class)
-@Tag("login")
+@Tag("regression")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LoginTest extends BaseClass {
 
