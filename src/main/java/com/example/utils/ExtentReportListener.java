@@ -11,8 +11,16 @@ import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import com.example.base.BaseClass;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -150,6 +158,35 @@ public class ExtentReportListener implements
                 failedTests.incrementAndGet();
                 DetailedReportGenerator.addTestCaseDetail(testName, "FAIL", executionTime, startTimeStr, new SimpleDateFormat("HH:mm:ss").format(new Date(testEndTime)));
                 System.out.println("✗ Test FAILED: " + testName);
+
+                // Capture screenshot for failed test and attach to report
+                try {
+                    Object testInstance = context.getTestInstance().orElse(null);
+                    WebDriver driver = null;
+                    if (testInstance instanceof BaseClass) {
+                        driver = ((BaseClass) testInstance).getDriver();
+                    }
+
+                    if (driver != null && driver instanceof TakesScreenshot) {
+                        // Ensure screenshots directory exists
+                        new File(REPORT_PATH + "screenshots/").mkdirs();
+                        String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSS").format(new Date());
+                        String safeName = testName.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
+                        String screenshotPath = REPORT_PATH + "screenshots/" + safeName + "_" + timestamp + ".png";
+
+                        File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                        Path dest = Paths.get(screenshotPath);
+                        Files.copy(src.toPath(), dest);
+
+                        // Attach screenshot to extent report
+                        extentTest.addScreenCaptureFromPath(screenshotPath);
+                        System.out.println("✓ Screenshot captured: " + screenshotPath);
+                    }
+                } catch (IOException ioe) {
+                    System.err.println("✗ Error saving screenshot: " + ioe.getMessage());
+                } catch (Exception e) {
+                    System.err.println("✗ Could not capture screenshot: " + e.getMessage());
+                }
             } else {
                 // Test passed
                 extentTest.pass("Test passed successfully");
@@ -184,14 +221,7 @@ public class ExtentReportListener implements
             // Generate detailed report with test case details
             DetailedReportGenerator.generateDetailedReport();
             
-            // Generate summary report
-            long endTime = System.currentTimeMillis();
-            long executionTimeMs = endTime - startTime;
-            
-            SummaryReportGenerator summaryGenerator = new SummaryReportGenerator(
-                totalTests.get(), passedTests.get(), failedTests.get(), skippedTests.get(), executionTimeMs
-            );
-            summaryGenerator.generateSummaryReport();
+            // Summary report generation removed
         }
     }
     
