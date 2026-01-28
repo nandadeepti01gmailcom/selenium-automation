@@ -74,7 +74,7 @@ public class DashboardTest extends BaseClass {
             }
             
             // Validate that menu list contains expected menu items (case-insensitive)
-            assertTrue(menuList.stream().anyMatch(menu -> menu.equalsIgnoreCase("Homes")), "Menu should contain 'Home'");
+            assertTrue(menuList.stream().anyMatch(menu -> menu.equalsIgnoreCase("Home")), "Menu should contain 'Home'");
             assertTrue(menuList.stream().anyMatch(menu -> menu.equalsIgnoreCase("Practice")), "Menu should contain 'Practice'");
             assertTrue(menuList.stream().anyMatch(menu -> menu.equalsIgnoreCase("Courses")), "Menu should contain 'Courses'");
             assertTrue(menuList.stream().anyMatch(menu -> menu.equalsIgnoreCase("Blog")), "Menu should contain 'Blog'");
