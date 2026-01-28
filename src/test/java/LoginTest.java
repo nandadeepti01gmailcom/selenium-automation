@@ -38,6 +38,7 @@ public class LoginTest extends BaseClass {
      * This is the first test to verify the page is accessible
      * Foundation test - if this fails, others may fail due to page access issues
      */
+    @Tag("smoke")
     @Test
     @Order(1)
     public void testLoginPageTitle() {
@@ -70,6 +71,7 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Login page loaded successfully with title: " + pageTitle);
     }
 
+    @Tag("smoke")
     @Test
     @Order(2)
     public void testLoginPageURL() {
@@ -101,6 +103,7 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Login page URL verified");
     }
 
+    @Tag("smoke")
     @Test
     @Order(3)
     public void testLoginWithValidCredentials() {
@@ -134,6 +137,7 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Login with valid credentials successful");
     }
 
+    @Tag("negative")
     @Test
     @Order(4)
     public void testLoginWithInvalidCredentials() {
@@ -167,6 +171,7 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Invalid credentials properly rejected");
     }
 
+    @Tag("edge")
     @Test
     @Order(5)
     public void testLoginWithEmptyCredentials() {

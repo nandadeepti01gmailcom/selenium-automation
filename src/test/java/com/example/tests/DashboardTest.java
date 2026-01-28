@@ -54,6 +54,7 @@ public class DashboardTest extends BaseClass {
      * This is the first test to verify the page is accessible
      * Foundation test - if this fails, others may fail due to page access issues
      */
+    @Tag("ui")
     @Test
     @Order(1)
     public void testDashboardMenus() {
