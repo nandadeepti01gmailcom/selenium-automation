@@ -1,6 +1,7 @@
 package com.example.tests;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
@@ -30,6 +31,7 @@ import com.example.utils.ExtentReportListener;
  * Tests are ordered to verify basic functionality first, then proceed to login tests
  */
 @ExtendWith(ExtentReportListener.class)
+@Tag("dashboard")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DashboardTest extends BaseClass {
 
