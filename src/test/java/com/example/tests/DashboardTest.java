@@ -32,6 +32,8 @@ import com.example.utils.ExtentReportListener;
  */
 @ExtendWith(ExtentReportListener.class)
 @Tag("regression")
+@Tag("Dshboard")
+@Tag("smoke")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DashboardTest extends BaseClass {
 
@@ -54,7 +56,7 @@ public class DashboardTest extends BaseClass {
      * This is the first test to verify the page is accessible
      * Foundation test - if this fails, others may fail due to page access issues
      */
-    @Tag("ui")
+    @Tag("smoke")
     @Test
     @Order(1)
     public void testDashboardMenus() {
