@@ -168,19 +168,22 @@ public class ExtentReportListener implements
                     }
 
                     if (driver != null && driver instanceof TakesScreenshot) {
-                        // Ensure screenshots directory exists
-                        new File(REPORT_PATH + "screenshots/").mkdirs();
                         String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSS").format(new Date());
                         String safeName = testName.replaceAll("[^a-zA-Z0-9-_\\.]", "_");
-                        String screenshotPath = REPORT_PATH + "screenshots/" + safeName + "_" + timestamp + ".png";
+                        String fileName = safeName + "_" + timestamp + ".png";
 
+                        // Build absolute screenshots directory under project root to avoid working-dir issues
+                        Path screenshotsDir = Paths.get(System.getProperty("user.dir")).resolve(REPORT_PATH).resolve("screenshots");
+                        Files.createDirectories(screenshotsDir);
+
+                        Path dest = screenshotsDir.resolve(fileName);
                         File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                        Path dest = Paths.get(screenshotPath);
                         Files.copy(src.toPath(), dest);
 
-                        // Attach screenshot to extent report
-                        extentTest.addScreenCaptureFromPath(screenshotPath);
-                        System.out.println("✓ Screenshot captured: " + screenshotPath);
+                        // Use relative path in report so links work when report is opened from project root
+                        String relativePath = REPORT_PATH + "screenshots/" + fileName;
+                        extentTest.addScreenCaptureFromPath(relativePath);
+                        System.out.println("✓ Screenshot captured: " + dest.toString());
                     }
                 } catch (IOException ioe) {
                     System.err.println("✗ Error saving screenshot: " + ioe.getMessage());

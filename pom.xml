@@ -51,6 +51,9 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+                     <properties>
+      <includeTags>smoke</includeTags>
+    </properties>
                 </configuration>
             </plugin>
             <plugin>
