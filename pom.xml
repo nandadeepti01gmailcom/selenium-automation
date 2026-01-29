@@ -51,9 +51,10 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                     <properties>
-      <includeTags>smoke</includeTags>
-    </properties>
+                    <properties>
+                        <!-- Read include tags from -DincludeTags (defaults to empty if not provided) -->
+                        <includeTags>${includeTags}</includeTags>
+                    </properties>
                 </configuration>
             </plugin>
             <plugin>
