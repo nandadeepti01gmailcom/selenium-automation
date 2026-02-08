@@ -17,7 +17,9 @@ on:
           - 'all'
           - 'custom'
         default: 'smoke'
-      
+        push:   # ADD THIS - temporary trigger
+    branches:
+      - feature/selenium
       include_tags:
         description: 'Tags to include (for custom suite, e.g., "smoke & login" or "p0 | p1")'
         required: false
