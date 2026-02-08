@@ -1,4 +1,4 @@
-name: Run Tests by Tags
+﻿name: Run Tests by Tags
 
 # Manual workflow to run specific test suites based on tags
 # Allows flexible test execution with custom tag combinations
@@ -55,10 +55,6 @@ on:
         required: false
         type: boolean
         default: true
-  
-  push:   # THIS IS THE CORRECT LOCATION - at the same level as workflow_dispatch
-    branches:
-      - feature/selenium
 
 jobs:
   test-execution:
