@@ -2,7 +2,6 @@ package com.example.tests;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
@@ -15,6 +14,7 @@ import com.example.pages.Login;
 import com.example.pages.Dashboard;
 import com.example.utils.TestDataManager;
 import com.example.utils.ExtentReportListener;
+import static com.example.utils.Tags.*;
 
 /**
  * Login Test Class
@@ -32,7 +32,10 @@ import com.example.utils.ExtentReportListener;
  * Tests are ordered to verify basic functionality first, then proceed to login tests
  */
 @ExtendWith(ExtentReportListener.class)
-@Tags({@Tag("regression"), @Tag("Dashboard"), @Tag("smoke")})
+@Tag(REGRESSION)
+@Tag(DASHBOARD)
+@Tag(UI)
+@Tag(NAVIGATION)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DashboardTest extends BaseClass {
 
@@ -55,7 +58,8 @@ public class DashboardTest extends BaseClass {
      * This is the first test to verify the page is accessible
      * Foundation test - if this fails, others may fail due to page access issues
      */
-    @Tag("Dashboard")
+    @Tag(SMOKE)
+    @Tag(P0)
     @Test
     @Order(1)
     public void testDashboardMenus() {

@@ -11,6 +11,7 @@ import com.example.base.BaseClass;
 import com.example.pages.Login;
 import com.example.utils.TestDataManager;
 import com.example.utils.ExtentReportListener;
+import static com.example.utils.Tags.*;
 
 /**
  * Login Test Class
@@ -28,7 +29,9 @@ import com.example.utils.ExtentReportListener;
  * Tests are ordered to verify basic functionality first, then proceed to login tests
  */
 @ExtendWith(ExtentReportListener.class)
-@Tag("regression")
+@Tag(REGRESSION)
+@Tag(LOGIN)
+@Tag(UI)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LoginTest extends BaseClass {
 
@@ -38,7 +41,8 @@ public class LoginTest extends BaseClass {
      * This is the first test to verify the page is accessible
      * Foundation test - if this fails, others may fail due to page access issues
      */
-    @Tag("smoke")
+    @Tag(SMOKE)
+    @Tag(P0)
     @Test
     @Order(1)
     public void testLoginPageTitle() {
@@ -71,7 +75,8 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Login page loaded successfully with title: " + pageTitle);
     }
 
-    @Tag("smoke")
+    @Tag(SMOKE)
+    @Tag(P0)
     @Test
     @Order(2)
     public void testLoginPageURL() {
@@ -103,7 +108,9 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Login page URL verified");
     }
 
-    @Tag("smoke")
+    @Tag(SMOKE)
+    @Tag(POSITIVE)
+    @Tag(P0)
     @Test
     @Order(3)
     public void testLoginWithValidCredentials() {
@@ -137,7 +144,9 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Login with valid credentials successful");
     }
 
-    @Tag("negative")
+    @Tag(REGRESSION)
+    @Tag(NEGATIVE)
+    @Tag(P1)
     @Test
     @Order(4)
     public void testLoginWithInvalidCredentials() {
@@ -171,7 +180,9 @@ public class LoginTest extends BaseClass {
         System.out.println("✓ Test PASSED: Invalid credentials properly rejected");
     }
 
-    @Tag("edge")
+    @Tag(REGRESSION)
+    @Tag(EDGE_CASE)
+    @Tag(P2)
     @Test
     @Order(5)
     public void testLoginWithEmptyCredentials() {
