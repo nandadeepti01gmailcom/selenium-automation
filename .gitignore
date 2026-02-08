@@ -12,3 +12,4 @@ test-reports/
 # Ignore OS files
 .DS_Store
 Thumbs.db
+target/classes/config.properties
