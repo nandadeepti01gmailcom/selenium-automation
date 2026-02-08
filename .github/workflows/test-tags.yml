@@ -55,10 +55,20 @@ on:
         required: false
         type: boolean
         default: true
+  
+  # TEMPORARY: Add push trigger to make workflow visible in Actions tab
+  # You can remove this section after the workflow runs once
+  push:
+    branches:
+      - feature/selenium
 
 jobs:
   test-execution:
     runs-on: ubuntu-latest
+    
+    # Only run on workflow_dispatch, skip automatic push triggers
+    # This prevents tests from running on every commit
+    if: github.event_name == 'workflow_dispatch'
     
     env:
       TEST_ENVIRONMENT: ${{ inputs.environment }}
@@ -212,70 +222,4 @@ jobs:
                 "fields": [
                   {
                     "type": "mrkdwn",
-                    "text": "*Test Suite:*\n${{ inputs.test_suite }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Environment:*\n${{ inputs.environment }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Browser:*\n${{ inputs.browser }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Status:*\n${{ steps.test_results.outputs.status }}"
-                  }
-                ]
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Total:* ${{ steps.test_results.outputs.total || '0' }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Passed:* ${{ steps.test_results.outputs.passed || '0' }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Failed:* ${{ steps.test_results.outputs.failed || '0' }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Skipped:* ${{ steps.test_results.outputs.skipped || '0' }}"
-                  }
-                ]
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*Triggered by:* ${{ github.actor }}\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}"
-                }
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View Run"
-                    },
-                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                ]
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-    - name: Fail workflow if tests failed
-      if: always() && steps.test_results.outputs.status == 'failed'
-      run: |
-        echo "Tests failed. Marking workflow as failed."
-        exit 1
+                    "text": "*Test Suite:*\n${{ inputs.test_](#)
