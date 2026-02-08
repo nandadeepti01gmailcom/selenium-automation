@@ -23,15 +23,31 @@ public class ConfigReader {
      * Load properties from config.properties file
      * Initializes the Properties object and reads the configuration file
      * Sets the default environment to 'dev' if not specified
+     * Also loads config.local.properties if it exists (for sensitive data like Slack webhooks)
+     * Local properties override main config properties
      * Handles IO exceptions with appropriate error messages
      */
     private static void loadProperties() {
         properties = new Properties();
         try {
+            // Load main config file
             String configFilePath = "src/main/resources/config.properties";
             FileInputStream fis = new FileInputStream(configFilePath);
             properties.load(fis);
             fis.close();
+            
+            // Load local config file if it exists (not tracked by git, for sensitive data)
+            try {
+                String localConfigPath = "src/main/resources/config.local.properties";
+                FileInputStream localFis = new FileInputStream(localConfigPath);
+                properties.load(localFis); // This will override properties from main config
+                localFis.close();
+                System.out.println("✓ Loaded local configuration overrides from config.local.properties");
+            } catch (IOException localEx) {
+                // Local config is optional, so just log a note if not found
+                System.out.println("ℹ No local config file found (this is optional)");
+            }
+            
             environment = properties.getProperty("environment", "dev");
             System.out.println("Environment: " + environment);
         } catch (IOException e) {

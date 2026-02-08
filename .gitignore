@@ -13,3 +13,7 @@ test-reports/
 .DS_Store
 Thumbs.db
 target/classes/config.properties
+
+# Ignore local configuration with sensitive data
+config.local.properties
+src/main/resources/config.local.properties

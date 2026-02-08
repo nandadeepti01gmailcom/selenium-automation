@@ -1,0 +1,34 @@
+# Local Configuration Template
+# ================================================================
+# This file shows which properties you can override locally for sensitive data
+# 
+# SETUP INSTRUCTIONS:
+# 1. Copy this file to: config.local.properties (in the same directory)
+# 2. Update the values with your actual sensitive data
+# 3. The config.local.properties file will NOT be tracked by git
+#
+# Properties in config.local.properties override the same properties in config.properties
+# ================================================================
+
+# ===== Slack Integration (Sensitive Data) =====
+# Enable/disable Slack notifications
+slack.notifications.enabled=true
+
+# Your actual Slack Webhook URL
+# Get this from: https://api.slack.com/messaging/webhooks
+# Example: https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+slack.webhook.url=YOUR_ACTUAL_SLACK_WEBHOOK_URL_HERE
+
+# Optional: Report base URL for clickable links in Slack
+# report.base.url=http://localhost:8080/test-reports
+
+# ===== Environment-Specific Credentials (if needed) =====
+# You can also override credentials for different environments here
+# dev.valid.username=your_username
+# dev.valid.password=your_password
+
+# staging.valid.username=your_staging_username
+# staging.valid.password=your_staging_password
+
+# ===== Other Sensitive Configuration =====
+# Add any other sensitive properties that shouldn't be committed to git
