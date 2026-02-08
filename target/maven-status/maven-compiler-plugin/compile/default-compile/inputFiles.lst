@@ -5,6 +5,7 @@ C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\ma
 C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\DetailedReportGenerator.java
 C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\ExtentReportListener.java
 C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\LocatorParser.java
+C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\SlackNotifier.java
 C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\SummaryReportGenerator.java
 C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\TestDataManager.java
 C:\Users\Nishant\Documents\Selenium-test-project\selenium-testing-project\src\main\java\com\example\utils\WebDriverFactory.java

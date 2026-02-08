@@ -207,13 +207,17 @@ public class ExtentReportListener implements
      */
     @Override
     public void afterAll(ExtensionContext context) {
-        // Don't flush here - let the shutdown hook handle it
-        // This prevents multiple flushes when multiple test classes finish
+        // Ensure report is flushed when JUnit finishes all tests in this context.
+        // We still guard against multiple flushes inside flushReport() using
+        // the atomic `reportFlushed` flag, so calling here is safe and makes
+        // reports + Slack notifications more reliable in CI environments.
+        flushReport();
     }
     
     /**
      * Flush the report (called by shutdown hook or manually)
      * Ensures report is flushed only once
+     * Sends test results to Slack after flushing
      */
     private static synchronized void flushReport() {
         if (extentReports != null && !reportFlushed.get()) {
@@ -225,6 +229,17 @@ public class ExtentReportListener implements
             DetailedReportGenerator.generateDetailedReport();
             
             // Summary report generation removed
+            
+            // Send test results to Slack
+            long duration = System.currentTimeMillis() - startTime;
+            SlackNotifier.sendTestResults(
+                totalTests.get(),
+                passedTests.get(),
+                failedTests.get(),
+                skippedTests.get(),
+                duration,
+                reportFileName
+            );
         }
     }
     

@@ -39,6 +39,12 @@
             <artifactId>extentreports</artifactId>
             <version>${extentreports.version}</version>
         </dependency>
+        <!-- Slack Webhook Integration -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -51,10 +57,7 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                    <properties>
-                        <!-- Read include tags from -DincludeTags (defaults to empty if not provided) -->
-                        <includeTags>${includeTags}</includeTags>
-                    </properties>
+                    <groups>${includeTags}</groups>
                 </configuration>
             </plugin>
             <plugin>

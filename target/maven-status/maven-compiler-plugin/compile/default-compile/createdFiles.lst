@@ -2,6 +2,7 @@ com\example\utils\ConfigReader.class
 com\example\utils\SummaryReportGenerator.class
 com\example\pages\Login.class
 com\example\utils\WebDriverFactory.class
+com\example\utils\SlackNotifier.class
 com\example\utils\DetailedReportGenerator.class
 com\example\utils\LocatorParser.class
 com\example\base\BasePage.class
