@@ -1,6 +1,4 @@
 name: Java CI - Maven Tests
-
-on:
  on:
   workflow_dispatch: {}
   # Manual dispatch allows running the workflow from GitHub UI or `gh` CLI
