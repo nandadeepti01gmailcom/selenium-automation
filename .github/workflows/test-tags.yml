@@ -217,8 +217,20 @@ jobs:
           echo "No test results found"
         fi
 
+    - name: Check Slack configuration
+      if: always() && env.SEND_SLACK == 'true'
+      run: |
+        if [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+          echo "⚠️  WARNING: Slack notifications enabled but SLACK_WEBHOOK_URL secret is not configured"
+          echo "ℹ️  To enable Slack notifications, add SLACK_WEBHOOK_URL to your GitHub repository secrets"
+          echo "ℹ️  Go to: Settings > Secrets and variables > Actions > New repository secret"
+        else
+          echo "✅ Slack webhook configured"
+        fi
+
     - name: Send Slack notification
       if: always() && env.SEND_SLACK == 'true'
+      continue-on-error: true
       uses: slackapi/slack-github-action@v1.26.0
       with:
         payload: |
