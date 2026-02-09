@@ -3,7 +3,16 @@
 ## Overview
 This project has two GitHub Actions workflows for running tests:
 1. **Java CI - Maven Tests** (`maven.yml`) - Automatic tests on push/PR/tags
-2. **Run Tests by Tags** (`test-tags.yml`) - Manual test execution with custom inputs
+2. **Run Tests by Tags** (`test-tags.yml`) - Manual test execution with custom inputs + automated scheduled runs
+
+### Automated Scheduled Runs
+The **Run Tests by Tags** workflow automatically executes:
+- **Schedule**: Daily at 9:00 PM UTC (2:30 AM IST next day)
+- **Test Suite**: Regression (full test coverage)
+- **Environment**: Dev
+- **Browser**: Chrome
+- **Slack Notifications**: Enabled
+- **Excluded Tags**: wip (work in progress tests)
 
 ## Run Tests by Tags Workflow
 
@@ -11,7 +20,8 @@ This project has two GitHub Actions workflows for running tests:
 1. Go to your GitHub repository
 2. Click on **Actions** tab
 3. Select **Run Tests by Tags** from the left sidebar
-4. Click **Run workflow** button (top right)
+4. Click **Run workflow** button (top right) for manual runs
+5. View scheduled run history in the workflow runs list (marked with "schedule" trigger)
 
 ### Input Parameters
 
@@ -265,6 +275,76 @@ Test specific scenarios:
 Test Suite: custom
 Include Tags: negative & login
 ```
+
+## Scheduled Test Runs
+
+### Default Schedule
+The workflow runs automatically every day at:
+- **UTC Time**: 9:00 PM (21:00)
+- **IST Time**: 2:30 AM (next day)
+- **Cron Expression**: `0 21 * * *`
+
+### Scheduled Run Configuration
+When triggered by schedule, the workflow uses these defaults:
+- **Test Suite**: `regression` - Full comprehensive test coverage
+- **Environment**: `dev` - Development environment
+- **Browser**: `chrome` - Chrome browser
+- **Exclude Tags**: `wip` - Skip work-in-progress tests
+- **Slack Notifications**: `enabled` - Always sends results to Slack
+
+### Identifying Scheduled Runs
+Scheduled runs are identified by:
+1. **Trigger**: Shows "schedule" instead of "workflow_dispatch"
+2. **Log Output**: Displays "This is an automated scheduled run (9PM UTC daily)"
+3. **Run List**: GitHub shows a clock icon ⏰ for scheduled runs
+
+### Customizing Schedule Time
+To change the schedule time, edit `.github/workflows/test-tags.yml`:
+
+```yaml
+on:
+  schedule:
+    # Change the cron expression
+    # Format: 'minute hour day-of-month month day-of-week'
+    - cron: '0 21 * * *'  # Current: 9 PM UTC
+    
+# Examples:
+# - cron: '0 0 * * *'   # Midnight UTC (5:30 AM IST)
+# - cron: '30 15 * * *' # 3:30 PM UTC (9:00 PM IST)
+# - cron: '0 12 * * 1'  # Noon UTC every Monday
+# - cron: '0 9 * * 1-5' # 9 AM UTC on weekdays
+```
+
+### Customizing Scheduled Test Suite
+To change what tests run on schedule, edit the `env` section:
+
+```yaml
+env:
+  TEST_SUITE: ${{ inputs.test_suite || 'regression' }}  # Change 'regression' to 'smoke' for faster runs
+  TEST_ENVIRONMENT: ${{ inputs.environment || 'dev' }}  # Change to 'staging' for staging tests
+  BROWSER: ${{ inputs.browser || 'chrome' }}            # Change to 'firefox' if needed
+  EXCLUDE_TAGS: ${{ inputs.exclude_tags || 'wip' }}     # Add more tags: 'wip,slow'
+```
+
+### Disabling Scheduled Runs
+To temporarily disable scheduled runs:
+1. Comment out or remove the `schedule` section in the workflow file
+2. Or keep the schedule but add a condition to skip:
+```yaml
+jobs:
+  test-execution:
+    # Skip scheduled runs temporarily
+    if: github.event_name != 'schedule'
+```
+
+### Viewing Scheduled Run History
+1. Go to **Actions** → **Run Tests by Tags**
+2. Look for runs with ⏰ clock icon
+3. Click on any run to see:
+   - Trigger type (schedule)
+   - Test results
+   - Execution time
+   - Slack notification status
 
 ## Troubleshooting
 
