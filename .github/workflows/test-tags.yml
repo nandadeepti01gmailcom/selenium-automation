@@ -233,6 +233,7 @@ jobs:
       continue-on-error: true
       uses: slackapi/slack-github-action@v1.26.0
       with:
+        webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
         payload: |
           {
             "text": "${{ steps.test_results.outputs.status == 'passed' && '✅' || '❌' }} Test Execution ${{ steps.test_results.outputs.status == 'passed' && 'PASSED' || 'FAILED' }}",
