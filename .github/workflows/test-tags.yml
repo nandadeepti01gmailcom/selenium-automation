@@ -2,8 +2,14 @@
 
 # Manual workflow to run specific test suites based on tags
 # Allows flexible test execution with custom tag combinations
+# Automated scheduled runs at 9PM UTC daily (2:30 AM IST)
 
 on:
+  schedule:
+    # Runs daily at 9:00 PM UTC (2:30 AM IST next day)
+    # Cron format: minute hour day-of-month month day-of-week
+    - cron: '0 21 * * *'
+  
   workflow_dispatch:
     inputs:
       test_suite:
@@ -61,8 +67,13 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      TEST_ENVIRONMENT: ${{ inputs.environment }}
-      BROWSER: ${{ inputs.browser }}
+      # For scheduled runs, use defaults; for manual runs, use inputs
+      TEST_SUITE: ${{ inputs.test_suite || 'regression' }}
+      INCLUDE_TAGS: ${{ inputs.include_tags || '' }}
+      EXCLUDE_TAGS: ${{ inputs.exclude_tags || 'wip' }}
+      TEST_ENVIRONMENT: ${{ inputs.environment || 'dev' }}
+      BROWSER: ${{ inputs.browser || 'chrome' }}
+      SEND_SLACK: ${{ inputs.send_slack_notification == true || github.event_name == 'schedule' }}
 
     steps:
     - name: Checkout repository
@@ -87,51 +98,55 @@ jobs:
         echo "=========================================="
         echo "Test Execution Configuration"
         echo "=========================================="
-        echo "Test Suite: ${{ inputs.test_suite }}"
-        echo "Environment: ${{ inputs.environment }}"
-        echo "Browser: ${{ inputs.browser }}"
-        echo "Include Tags: ${{ inputs.include_tags }}"
-        echo "Exclude Tags: ${{ inputs.exclude_tags }}"
-        echo "Slack Notification: ${{ inputs.send_slack_notification }}"
+        echo "Trigger: ${{ github.event_name }}"
+        echo "Test Suite: ${{ env.TEST_SUITE }}"
+        echo "Environment: ${{ env.TEST_ENVIRONMENT }}"
+        echo "Browser: ${{ env.BROWSER }}"
+        echo "Include Tags: ${{ env.INCLUDE_TAGS }}"
+        echo "Exclude Tags: ${{ env.EXCLUDE_TAGS }}"
+        echo "Slack Notification: ${{ env.SEND_SLACK }}"
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          echo "NOTE: This is an automated scheduled run (9PM UTC daily)"
+        fi
         echo "=========================================="
 
     - name: Build project
       run: mvn clean compile
 
     - name: Run Smoke Tests
-      if: inputs.test_suite == 'smoke'
+      if: env.TEST_SUITE == 'smoke'
       run: |
         echo "Running Smoke Tests..."
-        mvn test -DincludeTags=smoke -DexcludeTags=${{ inputs.exclude_tags }}
+        mvn test -DincludeTags=smoke -DexcludeTags=${{ env.EXCLUDE_TAGS }}
       continue-on-error: true
 
     - name: Run Regression Tests
-      if: inputs.test_suite == 'regression'
+      if: env.TEST_SUITE == 'regression'
       run: |
         echo "Running Regression Tests..."
-        mvn test -DincludeTags=regression -DexcludeTags=${{ inputs.exclude_tags }}
+        mvn test -DincludeTags=regression -DexcludeTags=${{ env.EXCLUDE_TAGS }}
       continue-on-error: true
 
     - name: Run Sanity Tests
-      if: inputs.test_suite == 'sanity'
+      if: env.TEST_SUITE == 'sanity'
       run: |
         echo "Running Sanity Tests..."
-        mvn test -DincludeTags=sanity -DexcludeTags=${{ inputs.exclude_tags }}
+        mvn test -DincludeTags=sanity -DexcludeTags=${{ env.EXCLUDE_TAGS }}
       continue-on-error: true
 
     - name: Run All Tests
-      if: inputs.test_suite == 'all'
+      if: env.TEST_SUITE == 'all'
       run: |
         echo "Running All Tests..."
-        mvn test -DexcludeTags=${{ inputs.exclude_tags }}
+        mvn test -DexcludeTags=${{ env.EXCLUDE_TAGS }}
       continue-on-error: true
 
     - name: Run Custom Tag Tests
-      if: inputs.test_suite == 'custom'
+      if: env.TEST_SUITE == 'custom'
       run: |
         echo "Running Custom Tag Tests..."
-        if [ -n "${{ inputs.include_tags }}" ]; then
-          mvn test -DincludeTags="${{ inputs.include_tags }}" -DexcludeTags=${{ inputs.exclude_tags }}
+        if [ -n "${{ env.INCLUDE_TAGS }}" ]; then
+          mvn test -DincludeTags="${{ env.INCLUDE_TAGS }}" -DexcludeTags=${{ env.EXCLUDE_TAGS }}
         else
           echo "Error: include_tags is required for custom test suite"
           exit 1
@@ -143,9 +158,10 @@ jobs:
       run: |
         echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Test Suite:** ${{ inputs.test_suite }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Browser:** ${{ inputs.browser }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Test Suite:** ${{ env.TEST_SUITE }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Environment:** ${{ env.TEST_ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Browser:** ${{ env.BROWSER }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         
         if [ -d "target/surefire-reports" ]; then
@@ -159,7 +175,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-reports-${{ inputs.test_suite }}-${{ inputs.environment }}-${{ github.run_id }}
+        name: test-reports-${{ env.TEST_SUITE }}-${{ env.TEST_ENVIRONMENT }}-${{ github.run_id }}
         path: |
           test-reports/**/*.html
           target/surefire-reports/**/*
@@ -193,7 +209,7 @@ jobs:
         fi
 
     - name: Send Slack notification
-      if: always() && inputs.send_slack_notification && secrets.SLACK_WEBHOOK_URL
+      if: always() && env.SEND_SLACK == 'true' && secrets.SLACK_WEBHOOK_URL
       uses: slackapi/slack-github-action@v1.26.0
       with:
         payload: |
@@ -204,7 +220,7 @@ jobs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "${{ steps.test_results.outputs.status == 'passed' && '✅' || '❌' }} Test Results - ${{ inputs.test_suite }}"
+                  "text": "${{ steps.test_results.outputs.status == 'passed' && '✅' || '❌' }} Test Results - ${{ env.TEST_SUITE }}"
                 }
               },
               {
@@ -212,15 +228,15 @@ jobs:
                 "fields": [
                   {
                     "type": "mrkdwn",
-                    "text": "*Test Suite:*\n${{ inputs.test_suite }}"
+                    "text": "*Test Suite:*\n${{ env.TEST_SUITE }}"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*Environment:*\n${{ inputs.environment }}"
+                    "text": "*Environment:*\n${{ env.TEST_ENVIRONMENT }}"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*Browser:*\n${{ inputs.browser }}"
+                    "text": "*Browser:*\n${{ env.BROWSER }}"
                   },
                   {
                     "type": "mrkdwn",
