@@ -1,10 +1,19 @@
-﻿name: Run Tests by Tags
+name: Run Tests by Tags
 
 # Manual workflow to run specific test suites based on tags
 # Allows flexible test execution with custom tag combinations
 # Automated scheduled runs at 9PM UTC daily (2:30 AM IST)
 
 on:
+  push:
+    branches:
+      - feature/selenium
+      - main
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - '.github/workflows/test-tags.yml'
+  
   schedule:
     # Runs daily at 9:00 PM UTC (2:30 AM IST next day)
     # Cron format: minute hour day-of-month month day-of-week
