@@ -7,7 +7,7 @@ This project has two GitHub Actions workflows for running tests:
 
 ### Automated Scheduled Runs
 The **Run Tests by Tags** workflow automatically executes:
-- **Schedule**: Daily at 9:00 PM UTC (2:30 AM IST next day)
+- **Schedule**: Daily at 5:10 AM UTC (10:40 AM IST)
 - **Test Suite**: Regression (full test coverage)
 - **Environment**: Dev
 - **Browser**: Chrome
@@ -280,9 +280,9 @@ Include Tags: negative & login
 
 ### Default Schedule
 The workflow runs automatically every day at:
-- **UTC Time**: 9:00 PM (21:00)
-- **IST Time**: 2:30 AM (next day)
-- **Cron Expression**: `0 21 * * *`
+- **UTC Time**: 5:10 AM (05:10)
+- **IST Time**: 10:40 AM
+- **Cron Expression**: `10 5 * * *`
 
 ### Scheduled Run Configuration
 When triggered by schedule, the workflow uses these defaults:
@@ -295,7 +295,7 @@ When triggered by schedule, the workflow uses these defaults:
 ### Identifying Scheduled Runs
 Scheduled runs are identified by:
 1. **Trigger**: Shows "schedule" instead of "workflow_dispatch"
-2. **Log Output**: Displays "This is an automated scheduled run (9PM UTC daily)"
+2. **Log Output**: Displays "This is an automated scheduled run (5:10 AM UTC daily)"
 3. **Run List**: GitHub shows a clock icon ⏰ for scheduled runs
 
 ### Customizing Schedule Time
@@ -306,7 +306,7 @@ on:
   schedule:
     # Change the cron expression
     # Format: 'minute hour day-of-month month day-of-week'
-    - cron: '0 21 * * *'  # Current: 9 PM UTC
+    - cron: '10 5 * * *'  # Current: 5:10 AM UTC (10:40 AM IST)
     
 # Examples:
 # - cron: '0 0 * * *'   # Midnight UTC (5:30 AM IST)
