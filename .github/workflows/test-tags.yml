@@ -1,4 +1,4 @@
-﻿name: Run Tests by Tags
+name: Run Tests by Tags
 
 # Manual workflow to run specific test suites based on tags
 # Allows flexible test execution with custom tag combinations
