@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-This is a **Selenium WebDriver** test automation framework using **Java 8**, **JUnit 5**, and **Maven**. The codebase follows the **Page Object Model (POM)** pattern with a layered architecture:
+This is a **Selenium WebDriver** test automation framework using **Java 11**, **JUnit 5**, and **Maven**. The codebase follows the **Page Object Model (POM)** pattern with a layered architecture:
 
 - **Base Layer** ([src/main/java/com/example/base](src/main/java/com/example/base)): `BaseClass` (test setup/teardown) and `BasePage` (common element interactions with explicit waits)
 - **Page Layer** ([src/main/java/Login.java](src/main/java/Login.java), [src/main/java/com/example/Dashboard.java](src/main/java/com/example/Dashboard.java)): Page objects encapsulating UI interactions
@@ -122,6 +122,6 @@ OR programmatically: `ConfigReader.setEnvironment("staging")`
 - **Default Test URL**: https://practicetestautomation.com/practice-test-login/ (dev environment)
 - **Alternative App**: Myntra e-commerce site (configured in properties)
 - **WebDriver waits**: Implicit (10s) + Explicit (15s) configured per environment
-- **Java Version**: 1.8 (source/target compatibility)
+- **Java Version**: 11 (source/target compatibility)
 - **Test Execution Order**: Tests use `@Order` to run page load checks before login tests
 - **Resource Location**: `src/main/resources/config.properties` accessed from classpath after `mvn compile`
