@@ -218,7 +218,7 @@ jobs:
         fi
 
     - name: Send Slack notification
-      if: always() && env.SEND_SLACK == 'true' && secrets.SLACK_WEBHOOK_URL
+      if: always() && env.SEND_SLACK == 'true'
       uses: slackapi/slack-github-action@v1.26.0
       with:
         payload: |
