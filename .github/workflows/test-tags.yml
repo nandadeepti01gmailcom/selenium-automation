@@ -375,11 +375,19 @@ jobs:
     - name: Send Slack notification
       if: always() && env.SEND_SLACK == 'true'
       continue-on-error: true
-      uses: slackapi/slack-github-action@v1.26.0
-      with:
-        payload: |
-          {
-            "text": "Test Execution ${{ steps.test_results.outputs.status == 'passed' && 'PASSED' || 'FAILED' }}",
+      shell: bash
+      run: |
+        SCREENSHOT_TEXT=""
+        if [ "${{ steps.screenshot_count.outputs.count }}" -gt "0" ]; then
+          SCREENSHOT_TEXT="*Failure Screenshots*\n\n*${{ steps.screenshot_count.outputs.count }} screenshot(s)* captured for failed test cases\n\nScreenshots are available in the artifacts:\n• Download \`failure-screenshots\` artifact from the workflow run\n• Or check \`test-reports\` artifact (includes all reports + screenshots)"
+        else
+          SCREENSHOT_TEXT="*No Failures*\n\nAll tests passed - No screenshots captured"
+        fi
+        
+        curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "text": "Test Execution ${{ steps.test_results.outputs.status }}",
             "blocks": [
               {
                 "type": "header",
@@ -391,48 +399,22 @@ jobs:
               {
                 "type": "section",
                 "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Test Suite:*\n${{ env.TEST_SUITE }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Environment:*\n${{ env.TEST_ENVIRONMENT }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Browser:*\n${{ env.BROWSER }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Status:*\n${{ steps.test_results.outputs.status }}"
-                  }
+                  {"type": "mrkdwn", "text": "*Test Suite:*\n${{ env.TEST_SUITE }}"},
+                  {"type": "mrkdwn", "text": "*Environment:*\n${{ env.TEST_ENVIRONMENT }}"},
+                  {"type": "mrkdwn", "text": "*Browser:*\n${{ env.BROWSER }}"},
+                  {"type": "mrkdwn", "text": "*Status:*\n${{ steps.test_results.outputs.status }}"}
                 ]
               },
               {
                 "type": "section",
                 "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Total:* ${{ steps.test_results.outputs.total || '0' }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Passed:* ${{ steps.test_results.outputs.passed || '0' }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Failed:* ${{ steps.test_results.outputs.failed || '0' }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Skipped:* ${{ steps.test_results.outputs.skipped || '0' }}"
-                  }
+                  {"type": "mrkdwn", "text": "*Total:* ${{ steps.test_results.outputs.total }}"},
+                  {"type": "mrkdwn", "text": "*Passed:* ${{ steps.test_results.outputs.passed }}"},
+                  {"type": "mrkdwn", "text": "*Failed:* ${{ steps.test_results.outputs.failed }}"},
+                  {"type": "mrkdwn", "text": "*Skipped:* ${{ steps.test_results.outputs.skipped }}"}
                 ]
               },
-              {
-                "type": "divider"
-              },
+              {"type": "divider"},
               {
                 "type": "section",
                 "text": {
@@ -447,14 +429,12 @@ jobs:
                   "text": "*Workflow Details*\n\n*Triggered by:* ${{ github.actor }}\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run Number:* #${{ github.run_number }}\n*Workflow URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                 }
               },
-              {
-                "type": "divider"
-              },
+              {"type": "divider"},
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "${{ steps.screenshot_count.outputs.count > 0 && format('*Failure Screenshots*\n\n*{0} screenshot(s)* captured for failed test cases\n\nScreenshots are available in the artifacts:\n• Download `failure-screenshots` artifact from the workflow run\n• Or check `test-reports` artifact (includes all reports + screenshots)', steps.screenshot_count.outputs.count) || '*No Failures*\n\nAll tests passed - No screenshots captured' }}"
+                  "text": "'"$SCREENSHOT_TEXT"'"
                 }
               },
               {
@@ -462,18 +442,13 @@ jobs:
                 "elements": [
                   {
                     "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "View Full Report"
-                    },
+                    "text": {"type": "plain_text", "text": "View Full Report"},
                     "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   }
                 ]
               }
             ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          }'
 
     - name: Fail workflow if tests failed
       if: always() && steps.test_results.outputs.status == 'failed'
