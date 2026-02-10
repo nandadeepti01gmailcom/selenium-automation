@@ -379,13 +379,13 @@ jobs:
       with:
         payload: |
           {
-            "text": "${{ steps.test_results.outputs.status == 'passed' && '✅' || '❌' }} Test Execution ${{ steps.test_results.outputs.status == 'passed' && 'PASSED' || 'FAILED' }}",
+            "text": "Test Execution ${{ steps.test_results.outputs.status == 'passed' && 'PASSED' || 'FAILED' }}",
             "blocks": [
               {
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "${{ steps.test_results.outputs.status == 'passed' && '✅' || '❌' }} Test Results - ${{ env.TEST_SUITE }}"
+                  "text": "Test Results - ${{ env.TEST_SUITE }} - ${{ steps.test_results.outputs.status }}"
                 }
               },
               {
