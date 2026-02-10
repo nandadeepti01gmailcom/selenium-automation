@@ -58,6 +58,31 @@
                         <include>**/*Test.java</include>
                     </includes>
                     <groups>${includeTags}</groups>
+                    <!-- Enhanced XML reporting with detailed test information -->
+                    <useFile>true</useFile>
+                    <printSummary>true</printSummary>
+                    <reportFormat>xml</reportFormat>
+                    <trimStackTrace>false</trimStackTrace>
+                    <disableXmlReport>false</disableXmlReport>
+                    <!-- Include detailed failure information -->
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <!-- Generate detailed reports -->
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <!-- Capture system properties and environment info -->
+                    <systemPropertyVariables>
+                        <test.environment>${TEST_ENVIRONMENT}</test.environment>
+                        <test.browser>${BROWSER}</test.browser>
+                        <test.suite>${TEST_SUITE}</test.suite>
+                    </systemPropertyVariables>
+                    <!-- Include stdout/stderr in reports -->
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <!-- Add timestamps to test execution -->
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>com.example.utils.ExtentReportListener</value>
+                        </property>
+                    </properties>
                 </configuration>
             </plugin>
             <plugin>
@@ -72,4 +97,21 @@
             </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <!-- Surefire Report Plugin - Generates HTML reports from XML test results -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <showSuccess>true</showSuccess>
+                    <linkXRef>false</linkXRef>
+                    <!-- Include detailed failure information in HTML reports -->
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

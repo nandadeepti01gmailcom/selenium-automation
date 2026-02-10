@@ -178,6 +178,57 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           find target/surefire-reports -name "*.txt" -exec cat {} \; >> $GITHUB_STEP_SUMMARY || true
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          
+          # Parse XML files for detailed test information
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Detailed Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          for xmlfile in target/surefire-reports/TEST-*.xml; do
+            if [ -f "$xmlfile" ]; then
+              # Extract test suite name
+              SUITE_NAME=$(basename "$xmlfile" .xml | sed 's/TEST-//')
+              echo "#### Test Suite: \`$SUITE_NAME\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              # Parse XML using xmllint and grep
+              TESTS=$(grep -oP 'tests="\K[0-9]+' "$xmlfile" | head -1)
+              FAILURES=$(grep -oP 'failures="\K[0-9]+' "$xmlfile" | head -1)
+              ERRORS=$(grep -oP 'errors="\K[0-9]+' "$xmlfile" | head -1)
+              SKIPPED=$(grep -oP 'skipped="\K[0-9]+' "$xmlfile" | head -1)
+              PASSED=$((TESTS - FAILURES - ERRORS - SKIPPED))
+              
+              echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Total Tests | $TESTS |" >> $GITHUB_STEP_SUMMARY
+              echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+              echo "| ❌ Failed | $FAILURES |" >> $GITHUB_STEP_SUMMARY
+              echo "| ⚠️ Errors | $ERRORS |" >> $GITHUB_STEP_SUMMARY
+              echo "| ⏭️ Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              # Extract failed test cases with failure reasons
+              if [ $FAILURES -gt 0 ] || [ $ERRORS -gt 0 ]; then
+                echo "<details><summary>❌ Failed Test Details</summary>" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                
+                # Use grep and awk to extract failure information
+                grep -A 2 '<failure\|<error' "$xmlfile" | while IFS= read -r line; do
+                  if [[ "$line" =~ testcase.*name=\"([^\"]+)\" ]]; then
+                    TEST_NAME="${BASH_REMATCH[1]}"
+                    echo "**Test:** \`$TEST_NAME\`" >> $GITHUB_STEP_SUMMARY
+                  elif [[ "$line" =~ message=\"([^\"]+)\" ]]; then
+                    FAILURE_MSG="${BASH_REMATCH[1]}"
+                    echo "**Reason:** $FAILURE_MSG" >> $GITHUB_STEP_SUMMARY
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                  fi
+                done || true
+                
+                echo "</details>" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          done
         fi
         
         # Check for failure screenshots
