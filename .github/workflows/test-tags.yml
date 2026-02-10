@@ -377,78 +377,88 @@ jobs:
       continue-on-error: true
       shell: bash
       run: |
-        SCREENSHOT_TEXT=""
+        # Construct screenshot text
         if [ "${{ steps.screenshot_count.outputs.count }}" -gt "0" ]; then
-          SCREENSHOT_TEXT="*Failure Screenshots*\n\n*${{ steps.screenshot_count.outputs.count }} screenshot(s)* captured for failed test cases\n\nScreenshots are available in the artifacts:\n• Download \`failure-screenshots\` artifact from the workflow run\n• Or check \`test-reports\` artifact (includes all reports + screenshots)"
+          SCREENSHOT_TEXT="*Failure Screenshots*\\n\\n*${{ steps.screenshot_count.outputs.count }} screenshot(s)* captured for failed test cases\\n\\nScreenshots are available in the artifacts:\\n• Download \`failure-screenshots\` artifact from the workflow run\\n• Or check \`test-reports\` artifact (includes all reports + screenshots)"
         else
-          SCREENSHOT_TEXT="*No Failures*\n\nAll tests passed - No screenshots captured"
+          SCREENSHOT_TEXT="*No Failures*\\n\\nAll tests passed - No screenshots captured"
         fi
         
+        # Construct JSON payload
+        PAYLOAD=$(cat <<EOF
+        {
+          "text": "Test Execution ${{ steps.test_results.outputs.status }}",
+          "blocks": [
+            {
+              "type": "header",
+              "text": {
+                "type": "plain_text",
+                "text": "Test Results - ${{ env.TEST_SUITE }} - ${{ steps.test_results.outputs.status }}"
+              }
+            },
+            {
+              "type": "section",
+              "fields": [
+                {"type": "mrkdwn", "text": "*Test Suite:*\\n${{ env.TEST_SUITE }}"},
+                {"type": "mrkdwn", "text": "*Environment:*\\n${{ env.TEST_ENVIRONMENT }}"},
+                {"type": "mrkdwn", "text": "*Browser:*\\n${{ env.BROWSER }}"},
+                {"type": "mrkdwn", "text": "*Status:*\\n${{ steps.test_results.outputs.status }}"}
+              ]
+            },
+            {
+              "type": "section",
+              "fields": [
+                {"type": "mrkdwn", "text": "*Total:* ${{ steps.test_results.outputs.total }}"},
+                {"type": "mrkdwn", "text": "*Passed:* ${{ steps.test_results.outputs.passed }}"},
+                {"type": "mrkdwn", "text": "*Failed:* ${{ steps.test_results.outputs.failed }}"},
+                {"type": "mrkdwn", "text": "*Skipped:* ${{ steps.test_results.outputs.skipped }}"}
+              ]
+            },
+            {"type": "divider"},
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "*Test Execution Summary*\\n\\n*Trigger:* ${{ github.event_name }}\\n*Test Suite:* ${{ env.TEST_SUITE }}\\n*Environment:* ${{ env.TEST_ENVIRONMENT }}\\n*Browser:* ${{ env.BROWSER }}"
+              }
+            },
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "*Workflow Details*\\n\\n*Triggered by:* ${{ github.actor }}\\n*Repository:* ${{ github.repository }}\\n*Branch:* ${{ github.ref_name }}\\n*Run Number:* #${{ github.run_number }}\\n*Workflow URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              }
+            },
+            {"type": "divider"},
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "${SCREENSHOT_TEXT}"
+              }
+            },
+            {
+              "type": "actions",
+              "elements": [
+                {
+                  "type": "button",
+                  "text": {"type": "plain_text", "text": "View Full Report"},
+                  "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }
+              ]
+            }
+          ]
+        }
+        EOF
+        )
+        
+        # Send to Slack
+        echo "Sending notification to Slack..."
         curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           -H "Content-Type: application/json" \
-          -d '{
-            "text": "Test Execution ${{ steps.test_results.outputs.status }}",
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "Test Results - ${{ env.TEST_SUITE }} - ${{ steps.test_results.outputs.status }}"
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {"type": "mrkdwn", "text": "*Test Suite:*\n${{ env.TEST_SUITE }}"},
-                  {"type": "mrkdwn", "text": "*Environment:*\n${{ env.TEST_ENVIRONMENT }}"},
-                  {"type": "mrkdwn", "text": "*Browser:*\n${{ env.BROWSER }}"},
-                  {"type": "mrkdwn", "text": "*Status:*\n${{ steps.test_results.outputs.status }}"}
-                ]
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {"type": "mrkdwn", "text": "*Total:* ${{ steps.test_results.outputs.total }}"},
-                  {"type": "mrkdwn", "text": "*Passed:* ${{ steps.test_results.outputs.passed }}"},
-                  {"type": "mrkdwn", "text": "*Failed:* ${{ steps.test_results.outputs.failed }}"},
-                  {"type": "mrkdwn", "text": "*Skipped:* ${{ steps.test_results.outputs.skipped }}"}
-                ]
-              },
-              {"type": "divider"},
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*Test Execution Summary*\n\n*Trigger:* ${{ github.event_name }}\n*Test Suite:* ${{ env.TEST_SUITE }}\n*Environment:* ${{ env.TEST_ENVIRONMENT }}\n*Browser:* ${{ env.BROWSER }}"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*Workflow Details*\n\n*Triggered by:* ${{ github.actor }}\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run Number:* #${{ github.run_number }}\n*Workflow URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                }
-              },
-              {"type": "divider"},
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "'"$SCREENSHOT_TEXT"'"
-                }
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {"type": "plain_text", "text": "View Full Report"},
-                    "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                ]
-              }
-            ]
-          }'
+          -d "$PAYLOAD"
+        
+        echo "Notification sent!"
 
     - name: Fail workflow if tests failed
       if: always() && steps.test_results.outputs.status == 'failed'
