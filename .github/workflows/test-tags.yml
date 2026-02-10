@@ -333,20 +333,31 @@ jobs:
                 ]
               },
               {
+                "type": "divider"
+              },
+              {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*Triggered by:* ${{ github.actor }}\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run Number:* #${{ github.run_number }}\n*Workflow URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  "text": "*📋 Test Execution Summary*\n\n*Trigger:* ${{ github.event_name }}\n*Test Suite:* ${{ env.TEST_SUITE }}\n*Environment:* ${{ env.TEST_ENVIRONMENT }}\n*Browser:* ${{ env.BROWSER }}"
                 }
               },
               {
-                "type": "context",
-                "elements": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "${{ steps.screenshot_count.outputs.count > 0 && format('📸 {0} failure screenshot(s) available in artifacts', steps.screenshot_count.outputs.count) || '✓ No failures - No screenshots captured' }}"
-                  }
-                ]
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*🔗 Workflow Details*\n\n*Triggered by:* ${{ github.actor }}\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run Number:* #${{ github.run_number }}\n*Workflow URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "${{ steps.screenshot_count.outputs.count > 0 && format('*📸 Failure Screenshots*\n\n*{0} screenshot(s)* captured for failed test cases\n\nScreenshots are available in the artifacts:\n• Download `failure-screenshots` artifact from the workflow run\n• Or check `test-reports` artifact (includes all reports + screenshots)', steps.screenshot_count.outputs.count) || '*✅ No Failures*\n\nAll tests passed - No screenshots captured' }}"
+                }
               },
               {
                 "type": "actions",
