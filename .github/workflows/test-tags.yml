@@ -184,6 +184,54 @@ jobs:
           echo "### 📊 Detailed Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
+          # Create comprehensive test execution table
+          echo "### 📋 Complete Test Execution Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Module / Test Suite | Test Name | Status | Duration |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------------------|-----------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          
+          for xmlfile in target/surefire-reports/TEST-*.xml; do
+            if [ -f "$xmlfile" ]; then
+              # Extract test suite name
+              SUITE_NAME=$(basename "$xmlfile" .xml | sed 's/TEST-//' | sed 's/.*\.//')
+              FULL_MODULE=$(basename "$xmlfile" .xml | sed 's/TEST-//')
+              
+              # Parse each test case from XML and create table rows
+              FIRST_ROW=true
+              while IFS= read -r line; do
+                if [[ "$line" =~ \<testcase[[:space:]].*name=\"([^\"]+)\".*time=\"([^\"]+)\" ]]; then
+                  TEST_NAME="${BASH_REMATCH[1]}"
+                  TEST_TIME="${BASH_REMATCH[2]}"
+                  
+                  # Check for failure/error/skipped in next lines
+                  STATUS="✅ PASSED"
+                  
+                  # Read ahead to check for failure/error/skipped
+                  FULL_TEST=$(grep -A 5 "name=\"$TEST_NAME\"" "$xmlfile")
+                  if echo "$FULL_TEST" | grep -q "<failure"; then
+                    STATUS="❌ FAILED"
+                  elif echo "$FULL_TEST" | grep -q "<error"; then
+                    STATUS="⚠️ ERROR"
+                  elif echo "$FULL_TEST" | grep -q "<skipped"; then
+                    STATUS="⏭️ SKIPPED"
+                  fi
+                  
+                  # Print module name only for first test
+                  if [ "$FIRST_ROW" = true ]; then
+                    echo "| **$SUITE_NAME** | \`$TEST_NAME\` | $STATUS | ${TEST_TIME}s |" >> $GITHUB_STEP_SUMMARY
+                    FIRST_ROW=false
+                  else
+                    echo "| | \`$TEST_NAME\` | $STATUS | ${TEST_TIME}s |" >> $GITHUB_STEP_SUMMARY
+                  fi
+                fi
+              done < "$xmlfile"
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Existing detailed breakdown per suite
           for xmlfile in target/surefire-reports/TEST-*.xml; do
             if [ -f "$xmlfile" ]; then
               # Extract test suite name
