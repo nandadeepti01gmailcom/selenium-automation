@@ -1,4 +1,4 @@
-name: Run Tests by Tags
+name: Execute Tests by Tags
 
 # Manual workflow to run specific test suites based on tags
 # Allows flexible test execution with custom tag combinations
@@ -179,6 +179,28 @@ jobs:
           find target/surefire-reports -name "*.txt" -exec cat {} \; >> $GITHUB_STEP_SUMMARY || true
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         fi
+        
+        # Check for failure screenshots
+        if [ -d "test-reports/screenshots" ]; then
+          SCREENSHOT_COUNT=$(find test-reports/screenshots -type f -name "*.png" 2>/dev/null | wc -l)
+          if [ "$SCREENSHOT_COUNT" -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 📸 Failure Screenshots" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$SCREENSHOT_COUNT screenshot(s) captured for failed test cases**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Screenshots are available in the artifacts:" >> $GITHUB_STEP_SUMMARY
+            echo "- Download 'failure-screenshots' artifact from the workflow run" >> $GITHUB_STEP_SUMMARY
+            echo "- Or check 'test-reports' artifact (includes all reports + screenshots)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Screenshot Files</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            find test-reports/screenshots -type f -name "*.png" -exec basename {} \; >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
 
     - name: Upload test reports
       if: always()
@@ -187,7 +209,17 @@ jobs:
         name: test-reports-${{ env.TEST_SUITE }}-${{ env.TEST_ENVIRONMENT }}-${{ github.run_id }}
         path: |
           test-reports/**/*.html
+          test-reports/screenshots/**/*
           target/surefire-reports/**/*
+        retention-days: 30
+
+    - name: Upload failure screenshots
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: failure-screenshots-${{ env.TEST_SUITE }}-${{ env.TEST_ENVIRONMENT }}-${{ github.run_id }}
+        path: test-reports/screenshots/**/*
+        if-no-files-found: ignore
         retention-days: 30
 
     - name: Check test results
@@ -215,6 +247,19 @@ jobs:
         else
           echo "status=unknown" >> $GITHUB_OUTPUT
           echo "No test results found"
+        fi
+
+    - name: Count failure screenshots
+      if: always()
+      id: screenshot_count
+      run: |
+        if [ -d "test-reports/screenshots" ]; then
+          COUNT=$(find test-reports/screenshots -type f -name "*.png" 2>/dev/null | wc -l)
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "📸 Found $COUNT failure screenshot(s)"
+        else
+          echo "count=0" >> $GITHUB_OUTPUT
+          echo "No screenshots directory found"
         fi
 
     - name: Check Slack configuration
@@ -293,6 +338,15 @@ jobs:
                   "type": "mrkdwn",
                   "text": "*Triggered by:* ${{ github.actor }}\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Run Number:* #${{ github.run_number }}\n*Workflow URL:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                 }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "${{ steps.screenshot_count.outputs.count > 0 && format('📸 {0} failure screenshot(s) available in artifacts', steps.screenshot_count.outputs.count) || '✓ No failures - No screenshots captured' }}"
+                  }
+                ]
               },
               {
                 "type": "actions",
